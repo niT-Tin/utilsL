@@ -44,8 +44,14 @@ func beforeCompare(a interface{}, b interface{}, field string) (reflect.Value, r
 	if v1.Type() != v2.Type() {
 		return reflect.Value{}, reflect.Value{}, 0, false, true
 	}
-	name1 := v1.FieldByName(field)
-	name2 := v2.FieldByName(field)
+	var name1, name2 reflect.Value
+	if field != "" {
+		name1 = v1.FieldByName(field)
+		name2 = v2.FieldByName(field)
+	} else {
+		name1 = v1
+		name2 = v2
+	}
 	typ := name1.Kind()
 	return name1, name2, typ, false, false
 }
