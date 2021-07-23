@@ -1,4 +1,4 @@
-package CompareL
+package comparel
 
 import (
 	"reflect"
@@ -23,6 +23,18 @@ func DeepGEqual(a, b interface{}, field string) bool {
 // DeepLEqual 深度比较a的field字段的值是否小于等于b的field字段的值
 func DeepLEqual(a, b interface{}, field string) bool {
 	return deep(a, b, field, deepValueLEqual)
+}
+
+// DeepSwap 交换a和b两个值
+func DeepSwap(a, b reflect.Value, dst interface{}) {
+	//typ1 := reflect.TypeOf(dst)
+	temp := reflect.New(reflect.TypeOf(dst))
+	fieldNum := a.NumField()
+	for i := 0; i < fieldNum; i++ {
+		temp.Elem().Field(i).Set( /*fmt.Println(*/ a.Field(i) /*)*/)
+	}
+	reflect.Indirect(a).Set(b)
+	reflect.Indirect(b).Set(temp.Elem())
 }
 
 // 使用指定函数进行深度比较
