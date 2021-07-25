@@ -14,7 +14,7 @@ func SelectionSort(arr interface{}, field string, dst interface{}) {
 		for i := 0; i < slice.Len(); i++ {
 			minI := i
 			for j := i; j < slice.Len(); j++ {
-				if comparel.DeepLesser(slice.Index(j).Interface(), slice.Index(i).Interface(), field) {
+				if comparel.DeepLesser(slice.Index(j).Interface(), slice.Index(minI).Interface(), field) {
 					minI = j
 				}
 			}
