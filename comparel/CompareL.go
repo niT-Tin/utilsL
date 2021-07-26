@@ -1,7 +1,8 @@
-package comparel
+package utils
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -25,16 +26,23 @@ func DeepLEqual(a, b interface{}, field string) bool {
 	return deep(a, b, field, deepValueLEqual)
 }
 
+// DeepEqual 深度比较a的field字段是否等于b的field字段的值
+func DeepEqual(a, b interface{}, field string) bool {
+	return deep(a, b, field, deepValueEqual)
+}
+
 // DeepSwap 交换a和b两个值
-func DeepSwap(a, b reflect.Value, dst interface{}) {
-	//typ1 := reflect.TypeOf(dst)
-	temp := reflect.New(reflect.TypeOf(dst))
-	fieldNum := a.NumField()
+func DeepSwap(a, b reflect.Value) {
+	temp := reflect.New(reflect.TypeOf(a.Interface()))
+	typeOf := reflect.TypeOf(a.Interface())
+	v1 := reflect.ValueOf(a.Interface())
+	v2 := reflect.ValueOf(b.Interface())
+	fieldNum := typeOf.NumField()
 	for i := 0; i < fieldNum; i++ {
-		temp.Elem().Field(i).Set( /*fmt.Println(*/ a.Field(i) /*)*/)
+		temp.Elem().Field(i).Set( /*fmt.Println(*/ v1.Field(i) /*)*/)
 	}
-	reflect.Indirect(a).Set(b)
-	reflect.Indirect(b).Set(temp.Elem())
+	a.Set(v2)
+	b.Set(temp.Elem())
 }
 
 // 使用指定函数进行深度比较
@@ -68,6 +76,22 @@ func beforeCompare(a interface{}, b interface{}, field string) (reflect.Value, r
 	return name1, name2, typ, false, false
 }
 
+func SwitchTypeSetValue(k reflect.Value, v string) {
+	switch k.Kind() {
+	case reflect.String:
+		k.SetString(v)
+	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+		atoi, _ := strconv.Atoi(v)
+		k.SetInt(int64(atoi))
+	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		atoi, _ := strconv.ParseUint(v, 10, 64)
+		k.SetUint(atoi)
+	case reflect.Float32, reflect.Float64:
+		float, _ := strconv.ParseFloat(v, 64)
+		k.SetFloat(float)
+	}
+}
+
 // 获取指定字段的类型，并调用指定函数进行比较
 func deepCompare(typ reflect.Kind, name1, name2 reflect.Value, f func(float64) bool) bool {
 	switch typ {
@@ -80,6 +104,14 @@ func deepCompare(typ reflect.Kind, name1, name2 reflect.Value, f func(float64) b
 	case reflect.Float32, reflect.Float64:
 		return f(name1.Float() - name2.Float())
 	default:
+		return false
+	}
+}
+
+func deepValueEqual(v1 float64) bool {
+	if v1 == 0 {
+		return true
+	} else {
 		return false
 	}
 }
