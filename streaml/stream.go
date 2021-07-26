@@ -34,12 +34,16 @@ type emptyInterface struct {
 	word unsafe.Pointer
 }
 
-func New(d interface{}, s interface{}) *Stream {
+func New(d interface{}) *Stream {
 	var types = make([]interface{}, 0)
+	var st interface{}
+	if isSlice(d) {
+		st = reflect.ValueOf(d).Index(0).Interface()
+	}
 	var t1 = Stream{
 		d,
 		reflect.TypeOf(d),
-		s,
+		st,
 		types,
 	}
 	//t = reflect.TypeOf(d)
