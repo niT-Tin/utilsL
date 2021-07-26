@@ -27,7 +27,7 @@ func TestStream_Filter(t *testing.T) {
 		{"Alex", 18},
 	}
 
-	Ns := streaml.New(ss, Person{})
+	Ns := streaml.New(ss)
 	fmt.Println(ss)
 	res := Ns.Filter(`t -> t.Age > 25`).Sort("Name").Min("")
 
