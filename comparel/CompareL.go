@@ -37,12 +37,18 @@ func DeepSwap(a, b reflect.Value) {
 	typeOf := reflect.TypeOf(a.Interface())
 	v1 := reflect.ValueOf(a.Interface())
 	v2 := reflect.ValueOf(b.Interface())
-	fieldNum := typeOf.NumField()
-	for i := 0; i < fieldNum; i++ {
-		temp.Elem().Field(i).Set( /*fmt.Println(*/ v1.Field(i) /*)*/)
+	if typeOf.Kind() != reflect.Struct {
+		temp.Elem().Set(v1)
+		reflect.Indirect(a).Set(v2)
+		reflect.Indirect(b).Set(temp.Elem())
+	} else {
+		fieldNum := typeOf.NumField()
+		for i := 0; i < fieldNum; i++ {
+			temp.Elem().Field(i).Set( /*fmt.Println(*/ v1.Field(i) /*)*/)
+		}
+		a.Set(v2)
+		b.Set(temp.Elem())
 	}
-	a.Set(v2)
-	b.Set(temp.Elem())
 }
 
 // 使用指定函数进行深度比较
