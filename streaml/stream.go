@@ -50,6 +50,10 @@ func New(d interface{}) *Stream {
 	return &t1
 }
 
+func IsStruct(a interface{}) bool {
+	return reflect.TypeOf(a).Kind() == reflect.Struct
+}
+
 func isSlice(d interface{}) bool {
 	return reflect.ValueOf(d).Kind() == reflect.Slice
 }
@@ -80,8 +84,11 @@ func (s *Stream) filter(field, arg, operator string) *Stream {
 	}
 	// 检查字段名是否有效
 	value := getInternalValue(s.Data)
-	if value.FieldByName(field).IsZero() {
-		panic(fieldMsg)
+	if IsStruct(s.singleType) {
+		//fmt.Printf("field = %#v\n",field)
+		if !value.FieldByName(field).IsValid() {
+			panic(fieldMsg)
+		}
 	}
 	return s.Operate(field, arg, operator)
 }
@@ -116,7 +123,11 @@ func noForMM(f func(a, b interface{}, field string) bool, s *Stream, fd string) 
 
 func (s *Stream) Operate(field, arg, operator string) *Stream {
 	value := reflect.New(reflect.TypeOf(s.singleType))
-	utils.SwitchTypeSetValue(value.Elem().FieldByName(field), arg)
+	if IsStruct(s.singleType) {
+		utils.SwitchTypeSetValue(value.Elem().FieldByName(field), arg)
+	} else {
+		utils.SwitchTypeSetValue(value.Elem(), arg)
+	}
 	switch operator {
 	case ">":
 		noForOp(utils.DeepGreater, s, value, field)
@@ -207,7 +218,11 @@ func lambdaSplit(lambda string) (obj []string, fields []string,
 	split := strings.Split(field[2], ".")
 	obj[0] = field[0]
 	obj[1] = split[0]
-	fields[0] = split[1]
+	if len(split) == 1 {
+		fields[0] = ""
+	} else {
+		fields[0] = split[1]
+	}
 	arg = field[len(field)-1]
 	operator = field[len(field)-2]
 	return obj, fields, arg, operator
