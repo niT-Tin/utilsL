@@ -68,6 +68,9 @@ func (s *Stream) Filter(lambda string) *Stream {
 	// res := Ns.Filter(`t -> t >= 3`)
 	// res should be the [3, 4, 5, 6]
 	// separate the lambda expression
+
+	// init the temp data
+	s.temp = []interface{}{}
 	obj, fields, arg, operator := lambdaSplit(lambda)
 	fieldL = fields[0]
 	operatorL = operator
@@ -106,7 +109,7 @@ func noForOp(f func(a, b interface{}, field string) bool,
 	for i := 0; i < reflect.ValueOf(s.Data).Len(); i++ {
 		if b = f(reflect.ValueOf(s.Data).Index(i).Interface(),
 			value.Elem().Interface(), field); b {
-			s.temp = append(s.temp, reflect.ValueOf(s.Data).Index(i).Interface())
+			s.temp = append(s.temp, utils.NewAssign(reflect.ValueOf(s.Data).Index(i).Interface()).Interface())
 		}
 	}
 }
