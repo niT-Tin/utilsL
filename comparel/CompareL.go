@@ -82,6 +82,23 @@ func beforeCompare(a interface{}, b interface{}, field string) (reflect.Value, r
 	return name1, name2, typ, false, false
 }
 
+// NewAssign 创建一个新的值，相当于赋值运算符 =
+func NewAssign(a interface{}) reflect.Value {
+	typeOf := reflect.TypeOf(a)
+	value := reflect.ValueOf(a)
+	t := reflect.New(typeOf)
+	if typeOf.Kind() != reflect.Struct {
+		t.Elem().Set(value)
+	} else {
+		fieldNum := typeOf.NumField()
+		for i := 0; i < fieldNum; i++ {
+			t.Elem().Field(i).Set(value.Field(i))
+		}
+	}
+	return t.Elem()
+}
+
+// SwitchTypeSetValue 判断结构体对应字段的类型并且赋予给定值
 func SwitchTypeSetValue(k reflect.Value, v string) {
 	switch k.Kind() {
 	case reflect.String:
